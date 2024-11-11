@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+	
+    <title>Deadlock Item Guesser</title>
+
+    <link rel="preload" href="assets/fonts/Colus-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous" />
+	
+	<link rel="stylesheet" href="assets/styles/common.css" type="text/css" />
+	<link rel="stylesheet" href="assets/styles/mods.css" type="text/css" />
+
+	<script src="assets/scripts/common.js"></script>
+</head>
+<body>
+
+<header>
+    <div>
+        <div></div>
+    </div>
+    <nav id="mainmenu">
+        <ul>
+            <li class="lblchk">
+                <label for="ctrlCheatSheet" id="lblCheatSheet" class="lbl" data-lang-id="lblCheatSheet">Cheat Sheet</label>
+                <input type="checkbox" id="ctrlCheatSheet" onchange="toggleCheatSheet(this)" checked /><label for="ctrlCheatSheet"></label>
+            </li>
+            <li class="lblchk">
+                <label for="ctrlRevealAnswers" id="lblRevealAnswers" class="lbl" data-lang-id="lblRevealAnswers">Reveal Answers</label>
+                <input type="checkbox" id="ctrlRevealAnswers" onchange="toggleRevealAnswers(this)" checked /><label for="ctrlRevealAnswers"></label>
+            </li>
+            <li><button data-lang-id="lblReset" onclick="gameReset()">Reset</button></li>
+        </ul>
+    </nav>
+</header>
+
+<section id="knowledgeTestScreen">
+    <h1 data-lang-id="knowledgeTestQuestion">What's the name of this item?</h1>
+    <div>
+        <div id="knowledgeTestCorrect">
+            <h2 data-lang-id="knowledgeTestCorrect">Correct</h2>
+            <p>0</p>
+        </div>
+        <div>
+            <div id="knowledgeTestQuestion" class="mod .mod-DURATION_EXTENDER"></div>
+        </div>
+        <div id="knowledgeTestMissed">
+            <h2 data-lang-id="knowledgeTestMissed">Missed</h2>
+            <p>0</p>
+        </div>
+    </div>
+    <input type="text" id="knowledgeTestInput" placeholder="Type the item name here..." data-lang-id="knowledgeTestInputPlaceholder" />
+    <section id="sectionRevealAnswers"></section>
+    <section id="sectionCheatSheet">
+        <h2>Weapon Mods</h2>
+        <ul id="modCheatSheetWeapon" class="modCheatSheet weapon"></ul>
+        <h2>Vitality Mods</h2>
+        <ul id="modCheatSheetVitality" class="modCheatSheet vitality"></ul>
+        <h2>Spirit Mods</h2>
+        <ul id="modCheatSheetSpirit" class="modCheatSheet spirit"></ul>
+    </section>
+</section>
+
+<script>
+const domKnowledgeTestQuestion = document.getElementById( "knowledgeTestQuestion" );
+const domKnowledgeTestCorrectValue = document.querySelector( "#knowledgeTestCorrect > p" );
+const domKnowledgeTestMissedValue = document.querySelector( "#knowledgeTestMissed > p" );
+const domKnowledgeTestInput = document.getElementById( "knowledgeTestInput" );
+const domModCheatSheetWeapon = document.getElementById( "modCheatSheetWeapon" );
+const domModCheatSheetVitality = document.getElementById( "modCheatSheetVitality" );
+const domModCheatSheetSpirit = document.getElementById( "modCheatSheetSpirit" );
+const domRevealAnswers = document.getElementById( "sectionRevealAnswers" );
+
+let appLocale = null;
+let modsWeapon = null;
+let modsVitality = null;
+let modsSpirit = null;
+let modNames = null;
+let modIndex = null;
+
+let gameModGuessQueue = new Array;
+let gameCurrentMod = 0;
+let gameBadGuess = false;
+let gameCorrectGuesses = 0;
+let gameMissedGuesses = 0;
+
+domKnowledgeTestInput.addEventListener( "keydown" , function( event ) {
+	if( event.key == "Enter" ) {
+		gameCheckAnswer();
+		event.preventDefault();
+	}
+});
+
+function applyLanguage( langData ) {
+    if( appLocale === null ) {
+        // No prior language was loaded.
+        appLocale = langData.ItemGuesser;
+    }
+    else {
+        // Overwrite current language (en_US should always be 100% complete, and is always loaded).
+        for( let key in langData.ItemGuesser ) {
+            if( appLocale.hasOwnProperty( key ) ) {
+                appLocale[key] = langData.ItemGuesser[key];
+            }
+        }
+    }
+
+    // Replace all text visible on the app.
+    document.querySelectorAll( "[data-lang-id]" ).forEach( domElement => {
+        const langId = domElement.getAttribute( "data-lang-id" );
+
+        if( appLocale.hasOwnProperty( langId ) ) {
+            if( domElement.tagName == "INPUT" ) { domElement.placeholder = appLocale[langId]; }
+            else { domElement.innerText = appLocale[langId]; }
+        }
+        else if( modNames.hasOwnProperty( langId ) ) {
+            if( domElement.tagName == "INPUT" ) { domElement.placeholder = modNames[langId]; }
+            else { domElement.innerText = modNames[langId]; }
+        }
+    });
+
+    // Change document language so TTS pronounces words properly.
+    if( langData.RFC5646 ) {
+        document.documentElement.lang = langData.RFC5646;
+    }
+}
+
+function toggleCheatSheet( trigger ) {
+    const target = document.getElementById( "sectionCheatSheet" );
+
+    if( trigger.checked ) { target.classList.remove( "hidden" ); }
+    else { target.classList.add( "hidden" ); }
+}
+
+function toggleRevealAnswers( trigger ) {
+    if( trigger.checked ) { domRevealAnswers.classList.remove( "hidden" ); }
+    else { domRevealAnswers.classList.add( "hidden" ); }
+}
+
+function updateScore() {
+    domKnowledgeTestCorrectValue.innerText = gameCorrectGuesses;
+    domKnowledgeTestMissedValue.innerText = gameMissedGuesses;
+}
+
+function gameStart() {
+	gameCurrentMod = 0;
+	gameModGuessQueue = generateRandomizedNumberSequenceArray( 0, modIndex.length - 1 );
+    gameCorrectGuesses = 0;
+    gameMissedGuesses = 0;
+    gameBadGuess = false;
+
+    updateScore();
+    domKnowledgeTestInput.value = "";
+
+	const createModLabels = function( modIndex, domElement ) {
+		domElement.innerHTML = "";
+
+		for( let key in modIndex ) {
+			if( modIndex.hasOwnProperty( key ) ) {
+				const label = document.createElement( "li" );
+				label.innerHTML = modNames[key];
+				label.id = "lbl-" + key;
+
+				domElement.append( label );
+			}
+		}
+	}
+
+	createModLabels( modsWeapon, domModCheatSheetWeapon );
+	createModLabels( modsVitality, domModCheatSheetVitality );
+	createModLabels( modsSpirit, domModCheatSheetSpirit );
+
+	domKnowledgeTestQuestion.className = "mod mod-" + modIndex[gameModGuessQueue[gameCurrentMod]];
+}
+
+function gameNext() {
+	if( ++gameCurrentMod >= gameModGuessQueue.length ) {
+		return;
+	}
+	
+	domKnowledgeTestQuestion.className = "mod mod-" + modIndex[gameModGuessQueue[gameCurrentMod]];
+}
+
+function gameReset() {
+    gameStart();
+	domRevealAnswers.innerHTML = "";
+	domRevealAnswers.classList.remove( "correct", "corrected", "wrong" );
+}
+
+function gameCheckAnswer() {
+	const guess = domKnowledgeTestInput.value;
+	const answer = modNames[modIndex[gameModGuessQueue[gameCurrentMod]]];
+
+	domRevealAnswers.innerHTML = "";
+	domRevealAnswers.classList.remove( "correct", "corrected", "wrong" );
+	
+	if( levenshtein( guess.toLowerCase(), answer.toLowerCase() ) <= 2 ) {
+		const domFeedbackHeader = document.createElement( "h3" );
+		const domFeedbackAnswer = document.createElement( "p" );
+
+		const header = document.createElement( "h3" );
+		const modContainer = document.createElement( "div" );
+		const modImage = document.createElement( "div" );
+		const modName = document.createElement( "p" );
+
+		if( !gameBadGuess ) {
+            ++gameCorrectGuesses;
+            updateScore();
+
+			document.getElementById( "lbl-" + modIndex[gameModGuessQueue[gameCurrentMod]] ).className = "correct";
+
+			domRevealAnswers.classList.add( "correct" );
+			header.innerHTML = "That's right!";
+			modContainer.className = "modReminder";
+			modImage.className = "mod mod-" + modIndex[gameModGuessQueue[gameCurrentMod]];
+			modName.innerHTML = answer;
+		}
+		else {
+			gameBadGuess = false;
+			document.getElementById( "lbl-" + modIndex[gameModGuessQueue[gameCurrentMod]] ).className = "wrong";
+
+			domRevealAnswers.classList.add( "corrected" );
+			header.innerHTML = "Remember for next time!";
+			modContainer.className = "modReminder";
+			modImage.className = "mod mod-" + modIndex[gameModGuessQueue[gameCurrentMod]];
+			modName.innerHTML = answer;
+		}
+
+		modContainer.append( modImage );
+		modContainer.append( modName );
+		domRevealAnswers.append( header );
+		domRevealAnswers.append( modContainer );
+		
+		domKnowledgeTestInput.value = "";
+		gameNext();
+	}
+	else {
+        if( !gameBadGuess ) {
+            ++gameMissedGuesses;
+            updateScore();
+        }
+
+        gameBadGuess = true;
+        domRevealAnswers.classList.add( "wrong" );
+
+        const wrongText = document.createElement( "p" );
+        wrongText.innerHTML = "The correct answer is: <strong>" + answer + "</strong>";
+
+        const instruction = document.createElement( "p" );
+        instruction.innerHTML = "Type the mod name correctly to proceed."
+        
+        domRevealAnswers.append( wrongText );
+        domRevealAnswers.append( instruction );
+
+		domKnowledgeTestInput.select();
+
+        if( !document.getElementById( "ctrlRevealAnswers" ).checked ) {
+            gameBadGuess = false;
+            document.getElementById( "lbl-" + modIndex[gameModGuessQueue[gameCurrentMod]] ).className = "wrong";
+            gameNext();
+            return;
+        }
+	}
+}
+
+Promise.all([
+	fetch( "assets/data/mods.json" ).then( response => response.json() ),
+	fetch( "assets/data/locale/en_US.json" ).then( response => response.json() )
+])
+.then( ([modsData, langData]) => {
+    // Contains all mods from their respective categories. Key is the "mod label". Value is currently an empty object but could contain mod attributes in the future.
+    modsWeapon = modsData.Weapon;
+	modsVitality = modsData.Vitality;
+	modsSpirit = modsData.Spirit;
+
+    // Load in the localised names for all the mods. Only allow the ones that appear in one of the three mod lists assigned above. Key is the "mod label". Value is the localised names.
+    modNames = {};
+    for( let key in langData.Mods ) {
+        if( langData.Mods.hasOwnProperty( key ) && (modsWeapon.hasOwnProperty( key ) || modsVitality.hasOwnProperty( key ) || modsSpirit.hasOwnProperty( key ) ) ) {
+            modNames[key] = langData.Mods[key];
+        }
+    }
+
+    // Create an indexed array of all the mods. Allows for referencing mods by index and randomization.
+    modIndex = Object.keys( modNames );
+
+	applyLanguage( langData );
+    gameStart();
+})
+.catch( error => {
+	console.error( "Error loading a JSON file:", error );
+})
+</script>
+
+</body>
+</html>

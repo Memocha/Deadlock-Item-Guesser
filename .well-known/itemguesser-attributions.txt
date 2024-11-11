@@ -1,0 +1,8 @@
+Logos:
+Deadlock (https://store.steampowered.com/app/1422450/Deadlock/)
+
+Fonts:
+Colus Regular (https://www.fontfabric.com/fonts/colus/)
+
+Javascript:
+JS-Levenshtein (https://github.com/gustf/js-levenshtein)

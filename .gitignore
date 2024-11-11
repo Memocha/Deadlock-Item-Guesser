@@ -1,0 +1,20 @@
+# Ignore local files specific to this project (e.g., references, caches)
+.local/
+
+# Ignore Visual Studio Code workspace files
+*.code-workspace
+
+# Ignore Eclipse project and settings files
+.project
+.settings/
+
+# Ignore Xcode workspace and project files
+*.xcworkspace
+*.xcodeproj
+
+# Ignore NetBeans project directory
+.nbproject/
+
+# Ignore Sublime Text project and workspace files
+*.sublime-project
+*.sublime-workspace

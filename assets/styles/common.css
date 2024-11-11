@@ -1,0 +1,319 @@
+@font-face {
+    font-family: "Colus";
+    src: url("../fonts/Colus-Regular.woff2") format("woff2");
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+}
+
+body {
+    background-color: #1a1b20;
+    font-family: "Colus", "Arial Black", sans-serif;
+    font-size: 16px;
+    color: #fff;
+}
+
+.lblchk {
+    opacity: 0.5;
+}
+
+.lblchk > input {
+    display: none;
+}
+
+.lblchk > input + label {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    background: url("../images/common.avif") no-repeat -0 -163px;
+    vertical-align: middle;
+    padding: 0;
+    cursor: pointer;
+}
+
+.lblchk > input:checked + label {
+    background-position: -24px -163px;
+}
+
+.lblchk:has(input:checked) {
+    opacity: 1.0;
+}
+
+body > header {
+    margin-bottom: 34px;
+}
+
+body > header > div {
+    height: 182px;
+    position: relative;
+}
+
+body > header > div > div {
+    width: 346px;
+    height: 163px;
+    position: absolute;
+    bottom: -19px;
+    left: calc( 50% - 173px );
+    background: url("../images/common.avif") no-repeat;
+    z-index: -1;
+}
+
+nav#mainmenu {
+    width: fit-content;
+    height: 42px;
+    margin: 0 auto;
+    background-color: #6c6c6c;
+    border-radius: 7px;
+    box-shadow: 2px 5px 5px rgba(0, 0, 0, 0.3);
+}
+
+nav#mainmenu > ul {
+    list-style: none;
+    padding: 5px 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: center;
+}
+
+nav#mainmenu > ul > li {
+    font-size: 22px;
+    color: #efdebf;
+    border-left: 2px solid #626262;
+    padding: 0 20px;
+    line-height: 32px;
+    user-select: none;
+    text-wrap: nowrap;
+}
+
+nav#mainmenu > ul > li:first-child {
+    border-left: 0;
+}
+
+nav#mainmenu > ul > li > label {
+    cursor: pointer;
+    margin-right: 7px;
+}
+
+nav#mainmenu button {
+    font-family: "Colus", "Arial Black", sans-serif;
+    font-size: 22px;
+    color: #efdebf;
+    border: 0;
+    background-color: transparent;
+    line-height: 32px;
+    cursor: pointer;
+    opacity: 0.5;
+}
+
+nav#mainmenu button:active {
+    color: #cabca2 !important;
+}
+
+nav#mainmenu button:hover,
+nav#mainmenu > ul > li > label:hover {
+    color: #ffeece;
+}
+
+#knowledgeTestScreen {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    align-items: center;
+    min-height: calc(100vh - 258px);
+}
+
+#knowledgeTestScreen > h1 {
+    width: 620px;
+    height: 40px;
+    text-align: center;
+    background: linear-gradient(90deg, rgba(0, 0, 0, 0) 0, black 150px, black calc( 100% - 150px ), rgba(0, 0, 0, 0) 100%);
+    font-size: 28px;
+    line-height: 40px;
+    margin: 0 0 16px;
+}
+
+#knowledgeTestScreen h2 {
+    font-size: 22px;
+    text-transform: uppercase;
+    font-weight: 500;
+    text-align: center;
+    margin: 6px 0 0;
+    line-height: 37px;
+}
+
+#knowledgeTestScreen p {
+    font-size: 48px;
+    font-weight: 700;
+    text-align: center;
+    margin: 0;
+    line-height: 54px;
+}
+
+#knowledgeTestCorrect p { color: #79ff28; }
+#knowledgeTestMissed p { color: #ff7a45; }
+
+#knowledgeTestScreen > div {
+    width: 430px;
+    height: 154px;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-content: center;
+    margin-bottom: 34px;
+}
+
+#knowledgeTestCorrect {
+    width: 147px;
+    height: 120px;
+    margin: 9px 0;
+    background: linear-gradient(90deg, rgba(0, 0, 0, 0) 0, black 100%);
+}
+
+#knowledgeTestScreen > div > div:nth-child(2) {
+    width: 138px;
+    height: 138px;
+    box-sizing: border-box;
+    border: 3px solid white;
+    border-radius: 9px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#knowledgeTestQuestion {
+    width: 120px;
+    height: 120px;
+    border-radius: 7px;
+}
+
+#knowledgeTestMissed {
+    width: 147px;
+    height: 120px;
+    margin: 9px 0;
+    background: linear-gradient(270deg, rgba(0, 0, 0, 0) 0, black 100%);
+}
+
+#knowledgeTestScreen > input {
+    width: 430px;
+    height: 50px;
+    background-color: #000;
+    border: 0;
+    border-radius: 7px;
+    font-family: "Colus", "Arial Black", sans-serif;
+    font-size: 22px;
+    text-transform: uppercase;
+    text-align: center;
+    color: #fff;
+    outline: none;
+}
+
+#knowledgeTestScreen > input::placeholder {
+    color: #6c6c6c;
+}
+
+#sectionRevealAnswers {
+    opacity: 1.0;
+    transition: opacity 0.25s ease;
+}
+
+#sectionRevealAnswers.hidden {
+    opacity: 0.0;
+}
+
+#sectionRevealAnswers h3 {
+    text-align: center;
+    font-size: 28px;
+}
+
+.modReminder {
+    display: flex;
+}
+
+.modReminder > .mod {
+    scale: 50%;
+    margin: -30px -30px;
+}
+
+#sectionRevealAnswers p {
+    margin: 0 0 0 1em;
+    font-size: 18px;
+    line-height: 60px;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+#sectionCheatSheet {
+    margin: auto 0 1em 0;
+    opacity: 1.0;
+    transition: opacity 0.25s ease;
+}
+
+#sectionCheatSheet.hidden {
+    opacity: 0.0;
+}
+
+.modCheatSheet {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.modCheatSheet > li {
+    display: flex;
+    align-items: center;
+    margin-right: 10px;
+    font-weight: 500;
+    color: #606060;
+}
+
+.modCheatSheet > li.correct,
+#sectionRevealAnswers.correct > h3 {
+    color: #39d029;
+}
+
+.modCheatSheet > li.wrong,
+#sectionRevealAnswers.wrong > p:first-child {
+    color: #c41818;
+}
+
+#sectionRevealAnswers.corrected > h3 {
+    color: #e0b909;
+}
+
+.modCheatSheet > li::after {
+    content: ''; 
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background-color: #c5c5c5;
+    margin-left: 10px;
+    position: relative;
+    top: 1px;
+}
+
+.modCheatSheet > li:last-child::after {
+    content: ''; 
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background-color: #c5c5c5;
+    margin-left: 10px;
+    position: relative;
+    top: 1px;
+}
+
+.modCheatSheet > li:last-child::after {
+    content: none;
+}
