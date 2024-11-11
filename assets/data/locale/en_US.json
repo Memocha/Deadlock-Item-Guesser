@@ -128,6 +128,13 @@
 		"ECHO_SHARD": "Echo Shard",
 		"MAGIC_CARPET": "Magic Carpet",
 		"REFRESHER": "Refresher"
+	},
+	"ModSynonyms": {
+		"Rounds": ["Bullets"],
+		"Magazine": ["Mag"],
+		"Spirit": ["Mystic"],
+		"Boots": ["Shoes", "Feet"],
+		"Restorative": ["Rejuvenating"]
 	}
 }
 

@@ -75,6 +75,7 @@ let modsWeapon = null;
 let modsVitality = null;
 let modsSpirit = null;
 let modNames = null;
+let modSynonyms = null;
 let modIndex = null;
 
 let gameModGuessQueue = new Array;
@@ -186,6 +187,38 @@ function gameReset() {
 	domRevealAnswers.classList.remove( "correct", "corrected", "wrong" );
 }
 
+function isAnswerAcceptable( guess, answer ) {
+    // Check the raw guess before moving on to the more CPU intensive but lenient check.
+    if( levenshtein( guess, answer ) <= 2 ) {
+        return true;
+    }
+
+    let guessParts = guess.split( " " );
+    let answerParts = answer.split( " " );
+
+    // Check if a word in the guess and answer approximately matches a synonym, then replace that word with the key/primary word.
+    for( let key in modSynonyms ) {
+        for( let s = 0; s < modSynonyms[key].length; ++s ) {
+            let synonym = modSynonyms[key][s].toLowerCase();
+
+            for( let w = 0; w < guessParts.length; ++w ) {
+                if( levenshtein( guessParts[w], synonym ) <= 1 ) {
+                    guessParts[w] = key;
+                }
+            }
+
+            for( let w = 0; w < answerParts.length; ++w ) {
+                if( levenshtein( answerParts[w], synonym ) <= 1 ) {
+                    answerParts[w] = key;
+                }
+            }
+        }
+    }
+
+    // Check the guess again with the replaced synonyms.
+    return levenshtein( guessParts.join( " " ), answerParts.join( " " ) ) <= 2;
+}
+
 function gameCheckAnswer() {
 	const guess = domKnowledgeTestInput.value;
 	const answer = modNames[modIndex[gameModGuessQueue[gameCurrentMod]]];
@@ -193,7 +226,7 @@ function gameCheckAnswer() {
 	domRevealAnswers.innerHTML = "";
 	domRevealAnswers.classList.remove( "correct", "corrected", "wrong" );
 	
-	if( levenshtein( guess.toLowerCase(), answer.toLowerCase() ) <= 2 ) {
+	if( isAnswerAcceptable( guess.trim().toLowerCase(), answer.toLowerCase() ) ) {
 		const domFeedbackHeader = document.createElement( "h3" );
 		const domFeedbackAnswer = document.createElement( "p" );
 
@@ -282,6 +315,9 @@ Promise.all([
 
     // Create an indexed array of all the mods. Allows for referencing mods by index and randomization.
     modIndex = Object.keys( modNames );
+
+    // Load in synonyms of word used in mods for leniency
+    modSynonyms = langData.ModSynonyms;
 
 	applyLanguage( langData );
     gameStart();
