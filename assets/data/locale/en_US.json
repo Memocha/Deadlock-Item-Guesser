@@ -130,11 +130,7 @@
 		"REFRESHER": "Refresher"
 	},
 	"ModSynonyms": {
-		"Rounds": ["Bullets"],
-		"Magazine": ["Mag"],
-		"Spirit": ["Mystic"],
-		"Boots": ["Shoes", "Feet"],
-		"Restorative": ["Rejuvenating"]
+		"Magazine": ["Mag"]
 	}
 }
 
