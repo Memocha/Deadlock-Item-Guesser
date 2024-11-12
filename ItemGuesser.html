@@ -28,6 +28,10 @@
                 <label for="ctrlRevealAnswers" id="lblRevealAnswers" class="lbl" data-lang-id="lblRevealAnswers">Reveal Answers</label>
                 <input type="checkbox" id="ctrlRevealAnswers" onchange="toggleRevealAnswers(this)" checked /><label for="ctrlRevealAnswers"></label>
             </li>
+            <li class="lblchk">
+                <label for="ctrlHardcore" id="lblHardcore" class="lbl" data-lang-id="lblHardcore">Hardcore</label>
+                <input type="checkbox" id="ctrlHardcore" onchange="updateMode()" /><label for="ctrlHardcore"></label>
+            </li>
             <li><button data-lang-id="lblReset" onclick="gameReset()">Reset</button></li>
         </ul>
     </nav>
@@ -48,7 +52,11 @@
             <p>0</p>
         </div>
     </div>
-    <input type="text" id="knowledgeTestInput" placeholder="Type the item name here..." data-lang-id="knowledgeTestInputPlaceholder" />
+    <section class="normalOnly" id="knowledgeTestChoice">
+    </section>
+    <section class="hardcoreOnly hidden">
+        <input type="text" id="knowledgeTestInput" placeholder="Type the item name here..." data-lang-id="knowledgeTestInputPlaceholder" />
+    </section>
     <section id="sectionRevealAnswers"></section>
     <section id="sectionCheatSheet">
         <h2>Weapon Mods</h2>
@@ -61,10 +69,12 @@
 </section>
 
 <script>
+const domModeHardcore = document.getElementById( "ctrlHardcore" );
 const domKnowledgeTestQuestion = document.getElementById( "knowledgeTestQuestion" );
 const domKnowledgeTestCorrectValue = document.querySelector( "#knowledgeTestCorrect > p" );
 const domKnowledgeTestMissedValue = document.querySelector( "#knowledgeTestMissed > p" );
 const domKnowledgeTestInput = document.getElementById( "knowledgeTestInput" );
+const domKnowledgeTestChoice = document.getElementById( "knowledgeTestChoice" );
 const domModCheatSheetWeapon = document.getElementById( "modCheatSheetWeapon" );
 const domModCheatSheetVitality = document.getElementById( "modCheatSheetVitality" );
 const domModCheatSheetSpirit = document.getElementById( "modCheatSheetSpirit" );
@@ -136,6 +146,27 @@ function toggleRevealAnswers( trigger ) {
     else { domRevealAnswers.classList.add( "hidden" ); }
 }
 
+function updateMode() {
+    if( domModeHardcore.checked ) {
+        document.querySelectorAll( ".hardcoreOnly" ).forEach( domElement => {
+            domElement.classList.remove( "hidden" );
+        });
+
+        document.querySelectorAll( ".normalOnly" ).forEach( domElement => {
+            domElement.classList.add( "hidden" );
+        });
+    }
+    else {
+        document.querySelectorAll( ".hardcoreOnly" ).forEach( domElement => {
+            domElement.classList.add( "hidden" );
+        });
+
+        document.querySelectorAll( ".normalOnly" ).forEach( domElement => {
+            domElement.classList.remove( "hidden" );
+        });
+    }
+}
+
 function updateScore() {
     domKnowledgeTestCorrectValue.innerText = gameCorrectGuesses;
     domKnowledgeTestMissedValue.innerText = gameMissedGuesses;
@@ -169,7 +200,7 @@ function gameStart() {
 	createModLabels( modsVitality, domModCheatSheetVitality );
 	createModLabels( modsSpirit, domModCheatSheetSpirit );
 
-	domKnowledgeTestQuestion.className = "mod mod-" + modIndex[gameModGuessQueue[gameCurrentMod]];
+	gameShowCurrent();
 }
 
 function gameNext() {
@@ -177,7 +208,38 @@ function gameNext() {
 		return;
 	}
 	
-	domKnowledgeTestQuestion.className = "mod mod-" + modIndex[gameModGuessQueue[gameCurrentMod]];
+	gameShowCurrent();
+}
+
+function gameShowCurrent() {
+    domKnowledgeTestQuestion.className = "mod mod-" + modIndex[gameModGuessQueue[gameCurrentMod]];
+
+    // Create a list of the correct answer plus four additional random choices.
+    let choices = [gameCurrentMod];
+    do {
+        let randomChoice = Math.floor( Math.random() * modIndex.length );
+
+        if( -1 == choices.indexOf( randomChoice ) ) {
+            choices.push( randomChoice );
+        }
+    }
+    while( choices.length < 5 );
+
+    choices.shuffle();
+
+    // Render the list of choices
+    domKnowledgeTestChoice.innerHTML = "";
+
+    for( let i = 0; i < choices.length; ++i ) {
+        const domChoice = document.createElement( "button" );
+        domChoice.innerText = modNames[modIndex[gameModGuessQueue[choices[i]]]];
+        domChoice.addEventListener( "click", function() {
+            domKnowledgeTestInput.value = modNames[modIndex[gameModGuessQueue[choices[i]]]];
+            gameCheckAnswer();
+        } );
+
+        domKnowledgeTestChoice.append( domChoice );
+    }
 }
 
 function gameReset() {
@@ -246,12 +308,18 @@ function gameCheckAnswer() {
         wrongText.innerHTML = "The correct answer is: <strong>" + answer + "</strong>";
 
         const instruction = document.createElement( "p" );
+        instruction.classList.add( "hardcoreOnly" );
         instruction.innerHTML = "Type the mod name correctly to proceed."
+
+        if( !domModeHardcore.checked ) {
+            instruction.classList.add( "hidden" );
+        }
+        else {
+            domKnowledgeTestInput.select();
+        }
         
         domRevealAnswers.append( wrongText );
         domRevealAnswers.append( instruction );
-
-		domKnowledgeTestInput.select();
 
         if( !document.getElementById( "ctrlRevealAnswers" ).checked ) {
             gameBadGuess = false;

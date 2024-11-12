@@ -121,6 +121,11 @@ nav#mainmenu > ul > li > label:hover {
     color: #ffeece;
 }
 
+.hardcoreOnly.hidden,
+.normalOnly.hidden {
+    display: none !important;
+}
+
 #knowledgeTestScreen {
     display: flex;
     flex-direction: column;
@@ -200,7 +205,44 @@ nav#mainmenu > ul > li > label:hover {
     background: linear-gradient(270deg, rgba(0, 0, 0, 0) 0, black 100%);
 }
 
-#knowledgeTestScreen > input {
+#knowledgeTestChoice {
+    width: 430px;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+}
+
+#knowledgeTestChoice > button {
+    display: block;
+    height: 50px;
+    background-color: #000;
+    border: 0;
+    border-radius: 7px;
+    font-family: "Colus", "Arial Black", sans-serif;
+    font-size: 22px;
+    text-transform: uppercase;
+    text-align: center;
+    color: #fff;
+    outline: none;
+    cursor: pointer;
+    margin-bottom: 0.4em;
+}
+
+#knowledgeTestChoice > button:last-child {
+    margin-bottom: 0;
+}
+
+#knowledgeTestChoice > button:hover {
+    background-color: #6c6c6c;
+    color: #efdebf;
+}
+
+#knowledgeTestChoice > button:active {
+    background-color: #474747;
+    color: #aea596;
+}
+
+#knowledgeTestScreen input[type=text] {
     width: 430px;
     height: 50px;
     background-color: #000;
@@ -214,7 +256,7 @@ nav#mainmenu > ul > li > label:hover {
     outline: none;
 }
 
-#knowledgeTestScreen > input::placeholder {
+#knowledgeTestScreen input[type=text]::placeholder {
     color: #6c6c6c;
 }
 
