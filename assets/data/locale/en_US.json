@@ -6,6 +6,7 @@
 		"lblSound": "Sound",
 		"lblReset": "Reset",
 		"knowledgeTestQuestion": "What's the name of this item?",
+		"knowledgeTestEndTitle": "You've done them all!",
 		"knowledgeTestCorrect": "Correct",
 		"knowledgeTestMissed": "Missed",
 		"knowledgeTestInputPlaceholder": "Type the item name here..."

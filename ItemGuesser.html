@@ -38,7 +38,7 @@
 </header>
 
 <section id="knowledgeTestScreen">
-    <h1 data-lang-id="knowledgeTestQuestion">What's the name of this item?</h1>
+    <h1 id="gameHeader" data-lang-id="knowledgeTestQuestion">What's the name of this item?</h1>
     <div>
         <div id="knowledgeTestCorrect">
             <h2 data-lang-id="knowledgeTestCorrect">Correct</h2>
@@ -52,10 +52,12 @@
             <p>0</p>
         </div>
     </div>
-    <section class="normalOnly" id="knowledgeTestChoice">
-    </section>
-    <section class="hardcoreOnly hidden">
-        <input type="text" id="knowledgeTestInput" placeholder="Type the item name here..." data-lang-id="knowledgeTestInputPlaceholder" />
+    <section id="knowledgeTestInputArea">
+        <section class="normalOnly" id="knowledgeTestChoice">
+        </section>
+        <section class="hardcoreOnly hidden">
+            <input type="text" id="knowledgeTestInput" placeholder="Type the item name here..." data-lang-id="knowledgeTestInputPlaceholder" />
+        </section>
     </section>
     <section id="sectionRevealAnswers"></section>
     <section id="sectionCheatSheet">
@@ -70,6 +72,7 @@
 
 <script>
 const domModeHardcore = document.getElementById( "ctrlHardcore" );
+const domKnowledgeTestInputArea = document.getElementById( "knowledgeTestInputArea" );
 const domKnowledgeTestQuestion = document.getElementById( "knowledgeTestQuestion" );
 const domKnowledgeTestCorrectValue = document.querySelector( "#knowledgeTestCorrect > p" );
 const domKnowledgeTestMissedValue = document.querySelector( "#knowledgeTestMissed > p" );
@@ -79,6 +82,7 @@ const domModCheatSheetWeapon = document.getElementById( "modCheatSheetWeapon" );
 const domModCheatSheetVitality = document.getElementById( "modCheatSheetVitality" );
 const domModCheatSheetSpirit = document.getElementById( "modCheatSheetSpirit" );
 const domRevealAnswers = document.getElementById( "sectionRevealAnswers" );
+const domGameHeader = document.getElementById( "gameHeader" );
 
 let appLocale = null;
 let modsWeapon = null;
@@ -206,6 +210,11 @@ function gameStart() {
 
 function gameNext() {
 	if( ++gameCurrentMod >= gameModGuessQueue.length ) {
+        // Game end
+        domKnowledgeTestInputArea.classList.add( "hidden" );
+        domRevealAnswers.classList.add( "hidden" );
+        domGameHeader.innerText = appLocale.knowledgeTestEndTitle;
+        domGameHeader.classList.add( "endTitle" );
 		return;
 	}
 	
@@ -244,6 +253,10 @@ function gameShowCurrent() {
 }
 
 function gameReset() {
+    domKnowledgeTestInputArea.classList.remove( "hidden" );
+    domRevealAnswers.classList.remove( "hidden" );
+    domGameHeader.innerText = appLocale.knowledgeTestQuestion;
+    domGameHeader.classList.remove( "endTitle" );
     gameStart();
 	domRevealAnswers.innerHTML = "";
 	domRevealAnswers.classList.remove( "correct", "corrected", "wrong" );
