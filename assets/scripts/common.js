@@ -1,4 +1,17 @@
 /**
+ * Shuffle the array.
+ * @returns 
+ */
+Array.prototype.shuffle = function() {
+	for (let i = this.length - 1; i > 0; i--) {
+		const j = Math.floor(Math.random() * (i + 1));
+		[this[i], this[j]] = [this[j], this[i]];
+	}
+
+    return this;
+};
+
+/**
  * Create an array with a sequence of numbers which is then randomized.
  * @param {int} start First number of the sequence.
  * @param {int} end Last number of the sequence.
@@ -10,13 +23,8 @@ function generateRandomizedNumberSequenceArray( from, to ) {
 	for( let i = from; i <= to; ++i ) {
 		numbers.push( i );
 	}
-	
-	for (let i = numbers.length - 1; i > 0; i--) {
-		const j = Math.floor(Math.random() * (i + 1));
-		[numbers[i], numbers[j]] = [numbers[j], numbers[i]];
-	}
-	
-	return numbers;
+
+    return numbers.shuffle();
 }
 
 /**
