@@ -138,13 +138,13 @@ function applyLanguage( langData ) {
 function toggleCheatSheet( trigger ) {
     const target = document.getElementById( "sectionCheatSheet" );
 
-    if( trigger.checked ) { target.classList.remove( "hidden" ); }
-    else { target.classList.add( "hidden" ); }
+    if( trigger.checked ) { target.classList.remove( "invisible" ); }
+    else { target.classList.add( "invisible" ); }
 }
 
 function toggleRevealAnswers( trigger ) {
-    if( trigger.checked ) { domRevealAnswers.classList.remove( "hidden" ); }
-    else { domRevealAnswers.classList.add( "hidden" ); }
+    if( trigger.checked ) { domRevealAnswers.classList.remove( "invisible" ); }
+    else { domRevealAnswers.classList.add( "invisible" ); }
 }
 
 function updateMode() {
